@@ -1,0 +1,12 @@
+.header {
+    box-sizing: border-box;
+    border-right: 2px solid #e7e5e4;
+}
+
+.line {
+    border-bottom: 2px solid #e7e5e4;
+}
+
+.agents-box {
+    border: 1px solid #e7e5e4;
+}

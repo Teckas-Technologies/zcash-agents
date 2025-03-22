@@ -1,0 +1,14 @@
+.top-nav {
+    border-bottom: 2px solid #e7e5e4;
+}
+
+.agents-box {
+    border: 1px solid #e7e5e4;
+}
+
+.chess-div {
+    background-image: url('/images/bg-light.svg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}

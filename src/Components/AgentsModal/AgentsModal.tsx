@@ -55,14 +55,14 @@ export default function AgentsModal({
   ];
 
   return (
-    <div className="fixed inset-0 flex items-end justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-end justify-center bg-white bg-opacity-50">
       <div
         ref={modalRef}
-        className="w-full bg-black border border-gray-700 text-white p-5 rounded-t-lg shadow-lg max-w-md"
+        className="w-full agents-box shadow chess-div text-white p-5 rounded-t-lg shadow-lg max-w-md"
       >
         {/* Header */}
-        <div className="border border-gray-700 rounded p-3">
-          <h2 className="text-lg font-bold" style={{ fontFamily: "orbitron" }}>
+        <div className=" agents-box bg-white rounded p-3">
+          <h2 className="text-lg font-bold text-[#21201C]" style={{ fontFamily: "orbitron" }}>
             Agents
           </h2>
           <p className="text-sm text-gray-400" style={{ fontFamily: "manrope" }}>
@@ -74,7 +74,7 @@ export default function AgentsModal({
             <input
               type="text"
               placeholder="Search"
-              className="w-full p-2 pl-4 bg-gray-800 text-white rounded placeholder-gray-400 focus:outline-none"
+              className="w-full p-2 pl-4 bg-[#F1F0EF] text-[#21201C] rounded placeholder-gray-400 focus:outline-none"
             />
           </div>
 
@@ -83,7 +83,7 @@ export default function AgentsModal({
             {sonicAgents?.length > 0 && sonicAgents.map((agent, index) => (
               <div
                 key={index}
-                className="p-3 bg-[#0c1a27] rounded-md cursor-pointer hover:bg-gray-700 transition-all"
+                className="p-3 agents-box bg-white shadow rounded-md cursor-pointer hover:bg-gray-700 transition-all"
                 onClick={() => {
                   setActiveAgent(agent);
                   onClose(); // Close modal after selection
@@ -91,8 +91,14 @@ export default function AgentsModal({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <img src="images/sonic-logo.png" className="h-[30px] w-[30px] rounded-full" />
-                    <h3 className="font-semibold text-sm truncate-1-lines">
+                  <div className="logo w-7 h-7 p-1 bg-[#21201C] rounded-md">
+                          <img
+                          src="/icons/network/near.svg"
+                          alt={`${agent} logo`}
+                          className="h-5 w-5"
+                        />
+                        </div>
+                    <h3 className="font-semibold text-sm truncate-1-lines text-[#21201C]">
                       {/* {agent.name.length > 25 ? agent.name.slice(0, 25) + "..." : agent.name} */}
                       {agent === "bridgeAgent" ?
                         "Bridge Assistant" :
@@ -124,7 +130,7 @@ export default function AgentsModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="w-full bg-transparent border border-gray-700 text-white py-2 rounded mt-3"
+          className="w-full bg-white agents-box shadow text-[#21201C] py-2 rounded mt-3"
           style={{ fontFamily: "manrope" }}
         >
           Close

@@ -156,6 +156,10 @@ export default function Dashboard({
       return;
     }
 
+    if (!state?.address) {
+      return;
+    }
+
     const userMessage: Message = { role: "human", message: message };
     setMessages((prev) => [...prev, userMessage]);
     setMessage(""); // Clear the input field
@@ -325,7 +329,7 @@ export default function Dashboard({
         <div className="flex-1 flex flex-col justify-center w-full md:w-[70%] lg:w-[71%] xl:w-[72%] md:px-0 md:py-0 py-2 px-1">
           {/* Execute Transactions with AI Box */}
           <div className="flex-1 flex flex-col items-center justify-center agents-box shadow rounded-lg md:mt-4 md:mx-4 p-[0.1rem] md:p-[0.4rem] lg:p-[0.7rem] xl:p-[1rem]">
-            {messages.length > 0 && <div className="top w-full flex justify-between items-center px-5 md:px-0 border-b border-gray-700 md:pb-3 md:py-0 py-3 bg-white">
+            {messages.length > 0 && <div className="top w-full flex justify-between items-center px-5 md:px-0 md:pb-3 md:py-0 py-3 bg-white">
               <h2
                 className="font-semibold text-md"
                 style={{ fontFamily: "orbitron" }}

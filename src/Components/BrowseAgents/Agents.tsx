@@ -207,23 +207,19 @@ const Agents = ({
                       {agent && (
                         <div className="logo w-8 h-8 p-1 bg-[#21201C] rounded-md">
                           <img
-                          src="/icons/network/near.svg"
-                          alt={`${agent} logo`}
-                          className="h-6 w-6"
-                        />
+                            src="/icons/network/near.svg"
+                            alt={`${agent} logo`}
+                            className="h-6 w-6"
+                          />
                         </div>
                       )}
                       <h5
                         className="text-base font-semibold truncate-1-lines text-[#21201C]"
                         style={{ fontFamily: "orbitron" }}
                       >
-                        {agent === "bridgeAgent" ?
-                          "Bridge Assistant" :
-                          agent === "swapAgent" ?
-                            "Swap Assistant" :
-                            agent === "coinMarketCapAgent" ?
-                              "CoinMarketCap Assistant" :
-                              "Liquidity Assistant"}
+                        {agent === "zecIntentAgent" ?
+                          "Zec Intent Assistant" :
+                          "Swap Assistant"}
                       </h5>
                     </div>
                     <button
@@ -243,13 +239,9 @@ const Agents = ({
                       maxWidth: "calc(100% - 1rem)",
                     }}
                   >
-                    {agent === "bridgeAgent" ?
-                      "Assistant for helping users to bridge tokens between Solana & Sonic SVM chains." :
-                      agent === "swapAgent" ?
-                        "Assistant for helping users to swap tokens between Solana & Sonic SVM chains." :
-                        agent === "coinMarketCapAgent" ?
-                          "Assistant for helping users to know the current market price of the tokens & all over the crypto activities in the world." :
-                          "Assistant for helping users to add liquidity to pool in Solana & Sonic SVM chains."}
+                    {agent === "zecIntentAgent" ?
+                      "Assistant for helping users to trade by $zec through simple chat" :
+                      "Assistant for helping users to swap tokens by near intents in all chains."}
                   </p>
 
                   {/* Author and Verification */}

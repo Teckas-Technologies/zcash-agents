@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useConnectWallet } from './useConnectWallet';
 
 interface RequestFields {
     inputMessage: string;
@@ -6,25 +7,29 @@ interface RequestFields {
 }
 
 export const useChat = () => {
+    const { state } = useConnectWallet();
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
 
     const chat = async (data: RequestFields) => {
+        if (!state.address) {
+            return;
+        }
         setLoading(true);
         setError(null);
 
         try {
-            const response = await fetch('https://sonic-agents-c3gwbpgtdzcffte5.canadacentral-01.azurewebsites.net/api/chat', {
+            const response = await fetch('https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    agentName: data.agentName, // "bridgeAgent"
+                    agentName: data.agentName, // "zecIntentAgent"
                     message: data.inputMessage,
-                    threadId: data.agentName,  // agent id
-                    userId: "connected-address",
+                    threadId: data.agentName,  // agent id = zecIntentAgent
+                    userId: state.address.replace("-", "").split(".")[0],
                 }),
             });
 
@@ -47,7 +52,7 @@ export const useChat = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`https://sonic-agents-c3gwbpgtdzcffte5.canadacentral-01.azurewebsites.net/api/list-agents`, {
+            const response = await fetch(`https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/list-agents`, {
                 method: "GET",
                 // headers: {
                 //     "Content-Type": "application/json",
@@ -71,10 +76,14 @@ export const useChat = () => {
     }
 
     const fetchChatHistory = async (agentName: string) => {
+        if (!state.address) {
+            return;
+        }
+        console.log(`TEST: ${state.address.split(".")[0]}/${agentName}`)
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`https://sonic-agents-c3gwbpgtdzcffte5.canadacentral-01.azurewebsites.net/api/history/${"connected-address"}/${agentName}`, {
+            const response = await fetch(`https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/history/${state.address.replace("-", "").split(".")[0]}/${agentName}`, {
                 method: "GET"
             })
             if (!response.ok) {
@@ -93,10 +102,13 @@ export const useChat = () => {
     }
 
     const clearHistory = async (agentName: string) => {
+        if (!state.address) {
+            return;
+        }
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`https://sonic-agents-c3gwbpgtdzcffte5.canadacentral-01.azurewebsites.net/api/history/${"connected-address"}/${agentName}`, {
+            const response = await fetch(`https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/history/${state.address.replace("-", "").split(".")[0]}/${agentName}`, {
                 method: "DELETE"
             })
             if (!response.ok) {

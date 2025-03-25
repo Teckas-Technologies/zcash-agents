@@ -91,22 +91,18 @@ export default function AgentsModal({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                  <div className="logo w-7 h-7 p-1 bg-[#21201C] rounded-md">
-                          <img
-                          src="/icons/network/near.svg"
-                          alt={`${agent} logo`}
-                          className="h-5 w-5"
-                        />
-                        </div>
+                    <div className="logo w-7 h-7 p-1 bg-[#21201C] rounded-md">
+                      <img
+                        src="/icons/network/near.svg"
+                        alt={`${agent} logo`}
+                        className="h-5 w-5"
+                      />
+                    </div>
                     <h3 className="font-semibold text-sm truncate-1-lines text-[#21201C]">
                       {/* {agent.name.length > 25 ? agent.name.slice(0, 25) + "..." : agent.name} */}
-                      {agent === "bridgeAgent" ?
-                        "Bridge Assistant" :
-                        agent === "swapAgent" ?
-                          "Swap Assistant" :
-                          agent === "coinMarketCapAgent" ?
-                            "CoinMarketCap Assistant" :
-                            "Liquidity Assistant"}
+                      {agent === "zecIntentAgent" ?
+                        "Zec Intent Assistant" :
+                        "Swap Assistant"}
                     </h3>
                   </div>
                   <IoMdInformationCircleOutline className="w-5 h-5 text-gray-400" />
@@ -114,13 +110,9 @@ export default function AgentsModal({
 
                 {/* Description */}
                 <p className="text-xs text-gray-400 mt-1">
-                  {agent === "bridgeAgent" ?
-                    "Assistant for helping users to bridge tokens between Solana & Sonic SVM chains." :
-                    agent === "swapAgent" ?
-                      "Assistant for helping users to swap tokens between Solana & Sonic SVM chains." :
-                      agent === "coinMarketCapAgent" ?
-                        "Assistant for helping users to know the current market price of the tokens & all over the crypto activities in the world." :
-                        "Assistant for helping users to add liquidity to pool in Solana & Sonic SVM chains."}
+                  {agent === "zecIntentAgent" ?
+                    "Assistant for helping users to trade by $zec through simple chat" :
+                    "Assistant for helping users to swap tokens by near intents in all chains."}
                 </p>
               </div>
             ))}

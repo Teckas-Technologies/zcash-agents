@@ -8,10 +8,12 @@ import { FaSearch } from "react-icons/fa";
 import AgentsModal from "../AgentsModal/AgentsModal";
 import { useChat } from "@/hooks/useChatHook";
 import dynamic from "next/dynamic";
-import { useApiSwapToken } from "@/hooks/useApiSwap";
+import { useSwap } from "@/hooks/useSwap";
 import "./Dashboard.css"
 import ConnectWallet from "../Wallet";
 import { useConnectWallet } from "@/hooks/useConnectWallet";
+import { QRCodeSVG } from 'qrcode.react';
+import { getBalance } from "@/utils/intentUtils";
 
 const MarkdownToJSX = dynamic(() => import("markdown-to-jsx"), { ssr: false });
 
@@ -42,7 +44,7 @@ interface Message {
   role: "ai" | "human",
   message: string;
   txHash?: string;
-  fromChain?: "solanamainnet" | "sonicsvm";
+  depositAddress?: string;
 }
 
 const dummymessages: Message[] = [
@@ -53,8 +55,8 @@ const dummymessages: Message[] = [
   { role: "ai", message: "Sure! Why don’t skeletons fight each other? Because they don’t have the guts!" },
   { role: "human", message: "What's the weather like today?" },
   { role: "ai", message: "I'm not connected to live data, but you can check a weather website for the latest update!" },
-  { role: "human", message: "Can you suggest a good book to read?" },
-  { role: "ai", message: "Of course! If you like fiction, 'The Alchemist' by Paulo Coelho is a great choice!" },
+  { role: "human", message: "I want to deposit!" },
+  { role: "ai", message: "Only deposit ZEC from the Zcash network to 6MWwWwGjQtFjQhvsBiqSHQJ7hX9UL1MdjmRbYsdek8aL. Depositing other assets or using a different network will result in loss of funds. Minimum deposit (0.0001 ZEC).", depositAddress: "6MWwWwGjQtFjQhvsBiqSHQJ7hX9UL1MdjmRbYsdek8aL" },
   { role: "human", message: "What is the capital of Japan?" },
   { role: "ai", message: "The capital of Japan is Tokyo!" }
 ];
@@ -71,7 +73,7 @@ export default function Dashboard({
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { state, signIn, connectors } = useConnectWallet();
-  const { swapToken } = useApiSwapToken();
+  const { swapToken } = useSwap();
   const { chat, fetchChatHistory, clearHistory, fetchAgents } = useChat();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -94,7 +96,7 @@ export default function Dashboard({
       if (queryAgent) {
         setActiveAgent(queryAgent);
       } else {
-        setActiveAgent("bridgeAgent")
+        setActiveAgent("zecIntentAgent")
       }
     }
   }, [agents]);
@@ -116,12 +118,12 @@ export default function Dashboard({
   // }, [agents])
 
   const fetchHistory = async () => {
-    const history = await fetchChatHistory(activeAgent || "bridgeAgent");
+    const history = await fetchChatHistory(activeAgent || "zecIntentAgent");
     const filteredMessages = history?.threads?.filter(
       (msg: Message) => msg.message.trim() !== ""
     );
 
-    setMessages(filteredMessages);
+    setMessages(filteredMessages || []);
   }
 
   const fetchSonicAgents = async () => {
@@ -130,7 +132,7 @@ export default function Dashboard({
   }
 
   const clearChatHistory = async () => {
-    await clearHistory(activeAgent || "bridgeAgent");
+    await clearHistory(activeAgent || "zecIntentAgent");
     setMessages([])
   }
 
@@ -167,7 +169,7 @@ export default function Dashboard({
     setIsLoading(true);
 
     try {
-      const response = await chat({ inputMessage: message, agentName: activeAgent || "bridgeAgent" });
+      const response = await chat({ inputMessage: message, agentName: activeAgent || "zecIntentAgent" });
       console.log("RES:", response);
       if (response?.success) {
         if (response?.data?.tool_response !== "None") {
@@ -175,28 +177,48 @@ export default function Dashboard({
           console.log("TOOL MSG: ", toolMessage)
 
           if (toolMessage?.success) {
-            if (toolMessage?.type === "bridge") {
+            if (toolMessage?.type === "deposit") {
+              setMessages((prev) => [...prev, { role: "ai", depositAddress: toolMessage?.address, message: `Only deposit ZEC from the Zcash network to ${toolMessage?.address}. Depositing other assets or using a different network will result in loss of funds. Minimum deposit (0.0001 ZEC).` }]);
+              return;
+            } else if (toolMessage?.type === "balance") {
+              const balance = await getBalance(state.address, "zec.omft.near");
+              const balanceInSmallestUnit = BigInt(balance[0]);
+              const actualBalance = Number(balanceInSmallestUnit) / 10 ** 8;
 
-              setMessages((prev) => [...prev, { role: "ai", message: `Bridge from ${toolMessage?.fromChain === "solanamainnet" ? "Solana" : "Sonic SVM"} to ${toolMessage?.fromChain === "solanamainnet" ? "Sonic SVM" : "Solana"} is in progress...` }]);
-              setIsBridging(true);
-
-
+              if (actualBalance > 0) {
+                setMessages((prev) => [...prev, { role: "ai", message: `Your ZEC balance is ${actualBalance.toFixed(8)}` }]);
+                return;
+              } else {
+                setMessages((prev) => [...prev, { role: "ai", message: `You don't have ZEC tokens in your wallet.` }]);
+                return;
+              }
             } else if (toolMessage?.type === "swap") {
-              const { inputMint, outputMint, amount, poolId } = toolMessage;
+              const { inputTokenSymbol, outputTokenSymbol, amount } = toolMessage;
 
-              if (!inputMint || !outputMint || !amount || !poolId) {
+              if (!inputTokenSymbol || !outputTokenSymbol || !amount) {
                 setMessages((prev) => [...prev, { role: "ai", message: `Input fields are missing...` }]);
                 return;
               }
 
               setIsSwaping(true);
+              setMessages((prev) => [...prev, { role: "ai", message: `Swap is in progress...` }]);
+              const swapRes = await swapToken({ assetInput: inputTokenSymbol, amountInput: amount.toString(), assetOutput: outputTokenSymbol });
 
-              setMessages((prev) => [...prev, { role: "ai", message: `Fetching pools...` }]);
-              updateLastAiMessage(`Fetching swap raw data...`);
-              updateLastAiMessage(`Swap is in progress...`);
+              if (swapRes?.success) {
+                console.log(`${swapRes.message}, txHash: ${swapRes.txHash}`)
+                setMessages((prev) => [...prev, { role: "ai", message: `Your recent swap was success!`, txHash: swapRes.txHash }]);
+                return;
+              } else {
+                setMessages((prev) => [...prev, { role: "ai", message: `Your recent swap was failed!` }]);
+                return;
+              }
 
-            } else if (toolMessage?.type === "coinMarketCap") {
-              const aiMessage: Message = { role: "ai", message: toolMessage?.response };
+              // setMessages((prev) => [...prev, { role: "ai", message: `Fetching pools...` }]);
+              // updateLastAiMessage(`Fetching swap raw data...`);
+              // updateLastAiMessage(`Swap is in progress...`);
+
+            } else if (toolMessage?.type === "withdraw") {
+              const aiMessage: Message = { role: "ai", message: "Withdraw tokens will come soon." };
               setMessages((prev) => [...prev, aiMessage]);
               return;
             }
@@ -300,25 +322,17 @@ export default function Dashboard({
                       />
                     </div>
                     <h3 className="font-semibold text-md truncate-1-lines w-[90%]">
-                      {agent === "bridgeAgent" ?
-                        "Bridge Assistant" :
-                        agent === "swapAgent" ?
-                          "Swap Assistant" :
-                          agent === "coinMarketCapAgent" ?
-                            "CoinMarketCap Assistant" :
-                            "Liquidity Assistant"}
+                      {agent === "zecIntentAgent" ?
+                        "Zec Intent Assistant" :
+                        "Swap Assistant"}
                     </h3>
                   </div>
                   <IoMdInformationCircleOutline className="w-5 h-5 text-gray-400 cursor-pointer" />
                 </div>
                 <p className="text-sm text-gray-400 mt-1 w-[90%] truncate-3-lines">
-                  {agent === "bridgeAgent" ?
-                    "Assistant for helping users to bridge tokens between Solana & Sonic SVM chains." :
-                    agent === "swapAgent" ?
-                      "Assistant for helping users to swap tokens between Solana & Sonic SVM chains." :
-                      agent === "coinMarketCapAgent" ?
-                        "Assistant for helping users to know the current market price of the tokens & all over the crypto activities in the world." :
-                        "Assistant for helping users to add liquidity to pool in Solana & Sonic SVM chains."}
+                  {agent === "zecIntentAgent" ?
+                    "Assistant for helping users to trade by $zec through simple chat" :
+                    "Assistant for helping users to swap tokens by near intents in all chains."}
                 </p>
               </div>
             ))}
@@ -364,6 +378,7 @@ export default function Dashboard({
               >
                 Execute Transactions with AI
               </h2>
+              {/* <QRCodeSVG value={text} size={128} /> */}
 
               {!state?.address && <div className="">
                 <ConnectWallet />
@@ -381,12 +396,15 @@ export default function Dashboard({
                   <>
                     <div
                       key={index}
-                      className={`message w-full h-auto flex gap-1 md:gap-2 lg:gap-3 my-2 ${msg.role === "ai" ? "justify-start" : "justify-end"}`}
+                      className={`message w-full h-auto flex ${msg.depositAddress ? "flex-col" : "flex-row"} gap-1 md:gap-2 lg:gap-3 my-2 ${msg.role === "ai" ? "justify-start" : "justify-end"}`}
                     >
                       {/* <p className={`px-3 py-2.5 max-w-md rounded-md w-auto ${msg.role === "ai" ? "bg-gray-800" : "bg-[#0000ff]"}`}>
                       {msg.message}
                     </p> */}
 
+                      {msg.depositAddress && <div className="deposit-qr">
+                        <QRCodeSVG value={msg.depositAddress} size={128} />
+                      </div>}
                       <div className={`px-3 py-2.5 max-w-md rounded-md w-auto text-white ${msg.role === "ai" ? "bg-[#21201C]" : "bg-[#00EC97]"} `}>
                         <MarkdownToJSX
                           options={{
@@ -415,11 +433,11 @@ export default function Dashboard({
                         </MarkdownToJSX>
                       </div>
                       {msg?.txHash && msg.role === "ai" && <>
-                        <a href={`${msg?.fromChain === "solanamainnet" ? `https://explorer.solana.com/tx/${msg?.txHash}` : `https://explorer.sonic.game/tx/${msg?.txHash}`}`} target="_blank" rel="noopener noreferrer" className="approve-btn flex items-center justify-center gap-1 px-2  mt-1 min-w-[5rem] bg-grey-700 max-w-[9rem] rounded-3xl border-1 border-zinc-600 hover:border-zinc-400 cursor-pointer">
+                        <a href={`https://nearblocks.io/txns/${msg?.txHash}`} target="_blank" rel="noopener noreferrer" className="approve-btn flex items-center justify-center gap-1 px-2  mt-1 min-w-[5rem] bg-grey-700 max-w-[9rem] rounded-3xl border-1 border-zinc-600 hover:border-zinc-400 cursor-pointer">
                           <h2 className="text-center dark:text-black text-sm">Check Explorer</h2>
                           <InlineSVG
                             src="/icons/goto.svg"
-                            className="fill-current bg-transparent text-white w-2.5 h-2.8"
+                            className="fill-current bg-transparent text-[#21201C] w-2.5 h-2.8"
                           />
                         </a>
                       </>}
@@ -442,10 +460,10 @@ export default function Dashboard({
 
             <div className="flex-1 bg-[#F1F0EF] rounded flex md:flex-row flex-col md:items-center items-start agents-box shadow px-2">
               <span
-                className="px-3 py-1 bg-[#f76b15] hidden md:block rounded text-white md:text-sm text-[8px] font-bold"
+                className="px-3 py-1 bg-[#f76b15] hidden md:block rounded text-white md:text-xs text-[8px] font-bold"
                 style={{ fontFamily: "orbitron" }}
               >
-                {activeAgent === "bridgeAgent" ? "Bridge Assistant" : activeAgent === "swapAgent" ? "Swap Assistant" : "SONIC ASSISTANT"}
+                {activeAgent === "zecIntentAgent" ? "ZEC INTENT ASSISTANT" : "SWAP ASSISTANT"}
               </span>
               <input
                 type="text"
@@ -482,7 +500,7 @@ export default function Dashboard({
                 className="px-3 py-1 bg-[#f76b15] rounded text-white text-xs md:text-sm font-bold"
                 style={{ fontFamily: "orbitron" }}
               >
-                {activeAgent === "bridgeAgent" ? "Bridge Assistant" : activeAgent === "swapAgent" ? "Swap Assistant" : "SONIC ASSISTANT"}
+                {activeAgent === "zecIntentAgent" ? "ZEC INTENT ASSISTANT" : "SWAP ASSISTANT"}
               </span>
 
               {/* Agents Button */}

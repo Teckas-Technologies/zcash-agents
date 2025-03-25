@@ -2,7 +2,7 @@ import * as v from "valibot"
 
 export const NEAR_NODE_URL =
     process.env.nearNodeUrl ?? "https://rpc.mainnet.near.org"
-export const NEAR_ENV = process.env.NEAR_ENV ?? "testnet"
+export const NEAR_ENV = process.env.NEAR_ENV ?? "mainnet"  // testnet
 
 export const NODE_IS_DEVELOPMENT = process.env.NODE_ENV === "development"
 export const NEXT_RUNTIME_NODE_JS = process.env.NEXT_RUNTIME === "nodejs"

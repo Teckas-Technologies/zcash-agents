@@ -25,8 +25,11 @@ export function useWalletAgnosticSignMessage() {
     ): Promise<WalletSignatureResult<T>> => {
         const chainType = state.chainType
 
+        console.log("Chain:", chainType)
+
         switch (chainType) {
             case ChainType.EVM: {
+                console.log("Entered EVM")
                 const signatureData = await signMessageAsyncWagmi({
                     message: walletMessage.ERC191.message,
                 })
@@ -38,6 +41,7 @@ export function useWalletAgnosticSignMessage() {
             }
 
             case ChainType.Near: {
+                console.log("Entered near")
                 const { signatureData, signedData } = await raceFirst(
                     signMessageNear({
                         ...walletMessage.NEP413,
@@ -52,6 +56,7 @@ export function useWalletAgnosticSignMessage() {
                 if (solanaWallet.signMessage == null) {
                     throw new Error("Solana wallet does not support signMessage")
                 }
+                console.log("Entered Sol")
 
                 const signatureData = await solanaWallet.signMessage(
                     walletMessage.SOLANA.message

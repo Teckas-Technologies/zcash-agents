@@ -212,7 +212,7 @@ export default function Dashboard({
                 return;
               } else if (!swapRes.success) {
                 console.log(`${swapRes.message}`)
-                updateLastAiMessage(`${swapRes.message}`);
+                updateLastAiMessage(`${swapRes.message === "Window closed" ? "You rejected the swap!" : swapRes.message}`);
                 return;
               } else {
                 updateLastAiMessage("Your recent swap has failed!")
@@ -236,7 +236,7 @@ export default function Dashboard({
                 return;
               } else if (!withdrawRes?.success) {
                 console.log(`${withdrawRes?.message}`)
-                updateLastAiMessage(`${withdrawRes?.message}`);
+                updateLastAiMessage(`${withdrawRes.message === "Window closed" ? "You rejected the withdrawal!" : withdrawRes.message}`);
                 return;
               } else {
                 updateLastAiMessage("Your recent withdraw was failed!")
@@ -464,7 +464,7 @@ export default function Dashboard({
                         </a>
                       </>}
                     </div>
-                    {isLoading && index === messages.length - 1 && <div className={`whole-div w-full flex items-center gap-1 justify-start`}>
+                    {isLoading && index === messages.length - 1 && !isSwaping && !isWithdraw && <div className={`whole-div w-full flex items-center gap-1 justify-start`}>
                       <div className={`relative message px-3 py-2.5 flex items-center gap-1 rounded-lg max-w-xs bg-gray-800`}>
                         <p className={`text-sm text-white`}>Typing...</p>
                       </div>

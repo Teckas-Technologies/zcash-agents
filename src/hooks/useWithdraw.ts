@@ -25,11 +25,10 @@ export const useWithdraw = () => {
 
         const { assetInput, amountInput } = data;
 
-        if (!state.address) {
-            return;
-        }
-
         try {
+            if (!state.address) {
+                throw new Error("Please connect your NEAR wallet.");
+            }
             setLoading(true);
             setError(null);
             const tokens = await fetchTokens();
@@ -37,7 +36,7 @@ export const useWithdraw = () => {
 
             const inputAsset = tokens?.find((token: any) => token.symbol.toLowerCase() === assetInput.toLowerCase());
             if (!inputAsset) {
-                throw new Error("Invalid asset symbols provided.");
+                throw new Error("Invalid token symbol provided.");
             }
 
             // Optionally log the found assets
@@ -121,7 +120,7 @@ export const useWithdraw = () => {
             // Handle settlement results
             if (settlementResult.status === "SETTLED") {
                 console.log("Transaction settled:", settlementResult.txHash);
-                return { success: true, message: `Withdraw executed successfully!` };
+                return { success: true, message: `Withdraw executed successfully!`, txHash: settlementResult.txHash };
             }
 
             if (settlementResult.status === "NOT_FOUND_OR_NOT_VALID") {

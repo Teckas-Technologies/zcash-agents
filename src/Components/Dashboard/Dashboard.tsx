@@ -14,6 +14,7 @@ import ConnectWallet from "../Wallet";
 import { useConnectWallet } from "@/hooks/useConnectWallet";
 import { QRCodeSVG } from 'qrcode.react';
 import { getBalance } from "@/utils/intentUtils";
+import { useWithdraw } from "@/hooks/useWithdraw";
 
 const MarkdownToJSX = dynamic(() => import("markdown-to-jsx"), { ssr: false });
 
@@ -74,13 +75,14 @@ export default function Dashboard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { state, signIn, connectors } = useConnectWallet();
   const { swapToken } = useSwap();
+  const { withdrawToken } = useWithdraw();
   const { chat, fetchChatHistory, clearHistory, fetchAgents } = useChat();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [agents, setAgents] = useState([]);
-  const [isBridging, setIsBridging] = useState(false);
+  const [isWithdraw, setIsWithdraw] = useState(false);
   const [isSwaping, setIsSwaping] = useState(false);
 
   useEffect(() => {
@@ -136,13 +138,13 @@ export default function Dashboard({
     setMessages([])
   }
 
-  const updateLastAiMessage = (newMessage: string) => {
+  const updateLastAiMessage = (newMessage: string, txHash?: string) => {
     setMessages((prev) => {
       const updatedMessages = [...prev];
       const lastIndex = updatedMessages.length - 1;
 
       if (updatedMessages[lastIndex]?.role === "ai") {
-        updatedMessages[lastIndex] = { role: "ai", message: newMessage };
+        updatedMessages[lastIndex] = { role: "ai", message: newMessage, txHash: txHash };
       } else {
         updatedMessages.push({ role: "ai", message: newMessage });
       }
@@ -178,7 +180,7 @@ export default function Dashboard({
 
           if (toolMessage?.success) {
             if (toolMessage?.type === "deposit") {
-              setMessages((prev) => [...prev, { role: "ai", depositAddress: toolMessage?.address, message: `Only deposit ZEC from the Zcash network to ${toolMessage?.address}. Depositing other assets or using a different network will result in loss of funds. Minimum deposit (0.0001 ZEC).` }]);
+              setMessages((prev) => [...prev, { role: "ai", depositAddress: toolMessage?.address, message: `Only deposit ZEC from the Zcash network to ${toolMessage?.address}. Depositing other assets or using a different network will result in loss of funds. Minimum deposit: 0.0001 ZEC.` }]);
               return;
             } else if (toolMessage?.type === "balance") {
               const balance = await getBalance(state.address, "zec.omft.near");
@@ -189,38 +191,58 @@ export default function Dashboard({
                 setMessages((prev) => [...prev, { role: "ai", message: `Your ZEC balance is ${actualBalance.toFixed(8)}` }]);
                 return;
               } else {
-                setMessages((prev) => [...prev, { role: "ai", message: `You don't have ZEC tokens in your wallet.` }]);
+                setMessages((prev) => [...prev, { role: "ai", message: `You have no ZEC tokens in your wallet.` }]);
                 return;
               }
             } else if (toolMessage?.type === "swap") {
               const { inputTokenSymbol, outputTokenSymbol, amount } = toolMessage;
 
               if (!inputTokenSymbol || !outputTokenSymbol || !amount) {
-                setMessages((prev) => [...prev, { role: "ai", message: `Input fields are missing...` }]);
+                setMessages((prev) => [...prev, { role: "ai", message: `Some input fields are missing...` }]);
                 return;
               }
 
               setIsSwaping(true);
-              setMessages((prev) => [...prev, { role: "ai", message: `Swap is in progress...` }]);
+              setMessages((prev) => [...prev, { role: "ai", message: `Swapping is in progress...` }]);
               const swapRes = await swapToken({ assetInput: inputTokenSymbol, amountInput: amount.toString(), assetOutput: outputTokenSymbol });
-
+              console.log("Swap RES:", swapRes)
               if (swapRes?.success) {
                 console.log(`${swapRes.message}, txHash: ${swapRes.txHash}`)
-                setMessages((prev) => [...prev, { role: "ai", message: `Your recent swap was success!`, txHash: swapRes.txHash }]);
+                updateLastAiMessage("Your recent swap was successful!", swapRes.txHash);
+                return;
+              } else if (!swapRes.success) {
+                console.log(`${swapRes.message}`)
+                updateLastAiMessage(`${swapRes.message}`);
                 return;
               } else {
-                setMessages((prev) => [...prev, { role: "ai", message: `Your recent swap was failed!` }]);
+                updateLastAiMessage("Your recent swap has failed!")
                 return;
               }
 
-              // setMessages((prev) => [...prev, { role: "ai", message: `Fetching pools...` }]);
-              // updateLastAiMessage(`Fetching swap raw data...`);
-              // updateLastAiMessage(`Swap is in progress...`);
-
             } else if (toolMessage?.type === "withdraw") {
-              const aiMessage: Message = { role: "ai", message: "Withdraw tokens will come soon." };
-              setMessages((prev) => [...prev, aiMessage]);
-              return;
+              const { amount, toAddress } = toolMessage;
+
+              if (!amount || !toAddress) {
+                setMessages((prev) => [...prev, { role: "ai", message: `Some input fields are missing...` }]);
+                return;
+              }
+              setIsWithdraw(true);
+              setMessages((prev) => [...prev, { role: "ai", message: `Your withdrawal is now being processed...` }]);
+              const withdrawRes = await withdrawToken({ assetInput: "ZEC", amountInput: amount.toString(), toAddress: toAddress });
+              console.log("Swap RES:", withdrawRes)
+              if (withdrawRes?.success) {
+                console.log(`${withdrawRes.message}, txHash: ${withdrawRes.txHash}`)
+                updateLastAiMessage("Your recent withdraw was success!", withdrawRes.txHash)
+                return;
+              } else if (!withdrawRes?.success) {
+                console.log(`${withdrawRes?.message}`)
+                updateLastAiMessage(`${withdrawRes?.message}`);
+                return;
+              } else {
+                updateLastAiMessage("Your recent withdraw was failed!")
+                return;
+              }
+
             }
           } else {
             setMessages((prev) => [...prev, { role: "ai", message: "Something went wrong, Try again later!" }]);
@@ -237,7 +259,7 @@ export default function Dashboard({
       console.error("Chat error:", error);
     } finally {
       setIsLoading(false);
-      setIsBridging(false);
+      setIsWithdraw(false);
     }
   }
 

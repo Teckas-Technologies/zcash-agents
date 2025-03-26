@@ -25,11 +25,10 @@ export const useSwap = () => {
 
         const { assetInput, amountInput, assetOutput } = data;
 
-        if (!state.address) {
-            return;
-        }
-
         try {
+            if (!state.address) {
+                throw new Error("Please connect your NEAR wallet.");
+            }
             setLoading(true);
             setError(null);
             const tokens = await fetchTokens();
@@ -39,7 +38,7 @@ export const useSwap = () => {
             const outputAsset = tokens?.find((token: any) => token.symbol.toLowerCase() === assetOutput.toLowerCase());
 
             if (!inputAsset || !outputAsset) {
-                throw new Error("Invalid asset symbols provided.");
+                throw new Error("Invalid token symbols provided.");
             }
 
             // Optionally log the found assets
@@ -60,6 +59,10 @@ export const useSwap = () => {
 
             const quote = await fetchQuote(inputAsset?.contract_address || inputAsset?.defuse_asset_id.includes(":") ? inputAsset?.defuse_asset_id.split(":")[1] : inputAsset?.defuse_asset_id, adjustedAmount.toString(), outputAsset?.contract_address || outputAsset?.defuse_asset_id.includes(":") ? outputAsset?.defuse_asset_id.split(":")[1] : outputAsset?.defuse_asset_id)
             console.log("Quote:", quote)
+
+            if (!quote) {
+                throw new Error("Cannot fetch your quote.");
+            }
 
             // Swap starts
 

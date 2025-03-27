@@ -1,6 +1,6 @@
 "use client"
 
-import { generateNonce, getBalance } from "@/utils/intentUtils";
+import { generateNonce, getBalance, storePublicKeyForSigVerification } from "@/utils/intentUtils";
 import { fetchIntentStatus, fetchQuote, fetchTokens } from "@/utils/rpcUtils";
 import { useState } from "react";
 import { useConnectWallet } from "./useConnectWallet";
@@ -44,6 +44,8 @@ export const useSwap = () => {
             // Optionally log the found assets
             console.log("Input Asset:", inputAsset);
             console.log("Output Asset:", outputAsset);
+
+            await storePublicKeyForSigVerification(state.address);
 
             // Convert the amountInput based on the inputAsset decimals
             const amountInDecimal = Math.round(parseFloat(amountInput) * Math.pow(10, inputAsset.decimals));

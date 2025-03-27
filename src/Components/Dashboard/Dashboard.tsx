@@ -15,6 +15,7 @@ import { useConnectWallet } from "@/hooks/useConnectWallet";
 import { QRCodeSVG } from 'qrcode.react';
 import { getBalance } from "@/utils/intentUtils";
 import { useWithdraw } from "@/hooks/useWithdraw";
+import { useInvestZec } from "@/hooks/useInvestZec";
 
 const MarkdownToJSX = dynamic(() => import("markdown-to-jsx"), { ssr: false });
 
@@ -76,6 +77,7 @@ export default function Dashboard({
   const { state, signIn, connectors } = useConnectWallet();
   const { swapToken } = useSwap();
   const { withdrawToken } = useWithdraw();
+  const { investZec } = useInvestZec();
   const { chat, fetchChatHistory, clearHistory, fetchAgents } = useChat();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -84,6 +86,7 @@ export default function Dashboard({
   const [agents, setAgents] = useState([]);
   const [isWithdraw, setIsWithdraw] = useState(false);
   const [isSwaping, setIsSwaping] = useState(false);
+  const [isInvesting, setIsInvesting] = useState(false);
 
   useEffect(() => {
     // Scroll to bottom when messages update
@@ -98,16 +101,18 @@ export default function Dashboard({
       if (queryAgent) {
         setActiveAgent(queryAgent);
       } else {
-        setActiveAgent("zecIntentAgent")
+        setActiveAgent("bridgeAgent")
       }
     }
   }, [agents]);
 
   useEffect(() => {
-    // if (wallets.length > 0) {
-    fetchHistory();
-    // }
-  }, [activeAgent])
+    if (state.address) {
+      fetchHistory();
+    } else {
+      setMessages([])
+    }
+  }, [activeAgent, state.address])
 
   useEffect(() => {
     fetchSonicAgents();
@@ -120,7 +125,7 @@ export default function Dashboard({
   // }, [agents])
 
   const fetchHistory = async () => {
-    const history = await fetchChatHistory(activeAgent || "zecIntentAgent");
+    const history = await fetchChatHistory(activeAgent || "bridgeAgent");
     const filteredMessages = history?.threads?.filter(
       (msg: Message) => msg.message.trim() !== ""
     );
@@ -134,7 +139,7 @@ export default function Dashboard({
   }
 
   const clearChatHistory = async () => {
-    await clearHistory(activeAgent || "zecIntentAgent");
+    await clearHistory(activeAgent || "bridgeAgent");
     setMessages([])
   }
 
@@ -171,7 +176,7 @@ export default function Dashboard({
     setIsLoading(true);
 
     try {
-      const response = await chat({ inputMessage: message, agentName: activeAgent || "zecIntentAgent" });
+      const response = await chat({ inputMessage: message, agentName: activeAgent || "bridgeAgent" });
       console.log("RES:", response);
       if (response?.success) {
         if (response?.data?.tool_response !== "None") {
@@ -182,19 +187,48 @@ export default function Dashboard({
             if (toolMessage?.type === "deposit") {
               setMessages((prev) => [...prev, { role: "ai", depositAddress: toolMessage?.address, message: `Only deposit ZEC from the Zcash network to ${toolMessage?.address}. Depositing other assets or using a different network will result in loss of funds. Minimum deposit: 0.0001 ZEC.` }]);
               return;
-            } else if (toolMessage?.type === "balance") {
-              const balance = await getBalance(state.address, "zec.omft.near");
-              const balanceInSmallestUnit = BigInt(balance[0]);
-              const actualBalance = Number(balanceInSmallestUnit) / 10 ** 8;
-
-              if (actualBalance > 0) {
-                setMessages((prev) => [...prev, { role: "ai", message: `Your ZEC balance is ${actualBalance.toFixed(8)}` }]);
-                return;
-              } else {
-                setMessages((prev) => [...prev, { role: "ai", message: `You have no ZEC tokens in your wallet.` }]);
+            } else if (toolMessage?.type === "invest") {
+              const { amount, tokens_to_invest } = toolMessage;
+              const tokensToBuy = JSON.parse(tokens_to_invest);
+              console.log("To Buy: ", tokensToBuy)
+              if (!amount) {
+                setMessages((prev) => [...prev, { role: "ai", message: `Some input fields are missing...` }]);
                 return;
               }
-            } else if (toolMessage?.type === "swap") {
+
+              setIsInvesting(true);
+              setMessages((prev) => [...prev, { role: "ai", message: `Trading logics are in progress` }]);
+              return;
+              // setMessages((prev) => [...prev, { role: "ai", message: `Investing ${amount} ZEC is in progress...` }]);
+              // const investRes = await investZec({ amount: amount, tokens: tokensToBuy });
+              // console.log("Invest RES:", investRes)
+              // if (investRes?.success) {
+              //   console.log(`${investRes.message}, txHash: ${investRes.txHash}`)
+              //   updateLastAiMessage("Your recent investment was successful!", investRes?.txHash as string);
+              //   return;
+              // } else if (!investRes?.success) {
+              //   console.log(`${investRes?.message}`)
+              //   updateLastAiMessage(`${investRes?.message === "Window closed" ? "You rejected the investment!" : investRes?.message}`);
+              //   return;
+              // } else {
+              //   updateLastAiMessage("Your recent investment has failed!")
+              //   return;
+              // }
+            }
+            // else if (toolMessage?.type === "balance") {
+            //   const balance = await getBalance(state.address, "zec.omft.near");
+            //   const balanceInSmallestUnit = BigInt(balance[0]);
+            //   const actualBalance = Number(balanceInSmallestUnit) / 10 ** 8;
+
+            //   if (actualBalance > 0) {
+            //     setMessages((prev) => [...prev, { role: "ai", message: `Your ZEC balance is ${actualBalance.toFixed(8)}` }]);
+            //     return;
+            //   } else {
+            //     setMessages((prev) => [...prev, { role: "ai", message: `You have no ZEC tokens in your wallet.` }]);
+            //     return;
+            //   }
+            // } 
+            else if (toolMessage?.type === "swap") {
               const { inputTokenSymbol, outputTokenSymbol, amount } = toolMessage;
 
               if (!inputTokenSymbol || !outputTokenSymbol || !amount) {
@@ -244,9 +278,6 @@ export default function Dashboard({
               }
 
             }
-          } else {
-            setMessages((prev) => [...prev, { role: "ai", message: "Something went wrong, Try again later!" }]);
-            return;
           }
         }
 
@@ -260,6 +291,8 @@ export default function Dashboard({
     } finally {
       setIsLoading(false);
       setIsWithdraw(false);
+      setIsInvesting(false);
+      setIsSwaping(false)
     }
   }
 
@@ -328,10 +361,10 @@ export default function Dashboard({
               <div
                 key={agent}
                 onClick={() => setActiveAgent(agent)}
-                className={`p-4 rounded cursor-pointer rounded-md border transition-all mt-2 duration-200 agents-box shadow 
+                className={`p-4 rounded cursor-pointer rounded-md border transition-all mt-2 duration-200 shadow 
           ${activeAgent === agent
-                    ? "border-[#fde68a]"
-                    : "border-transparent hover:border-[#fde68a]"
+                    ? "border-[#00EC97]"
+                    : "border-transparent agents-box hover:border-[#fde68a]"
                   }`}
               >
                 <div className="flex items-center justify-between">
@@ -344,17 +377,25 @@ export default function Dashboard({
                       />
                     </div>
                     <h3 className="font-semibold text-md truncate-1-lines w-[90%]">
-                      {agent === "zecIntentAgent" ?
-                        "Zec Intent Assistant" :
-                        "Swap Assistant"}
+                      {agent === "bridgeAgent" ?
+                        "Bridge Assistant" :
+                        agent === "swapAgent" ?
+                          "Swap Assistant" :
+                          agent === "tradeAgent" ?
+                            "Trade Assistant" :
+                            "Zec Intent Assistant"}
                     </h3>
                   </div>
                   <IoMdInformationCircleOutline className="w-5 h-5 text-gray-400 cursor-pointer" />
                 </div>
                 <p className="text-sm text-gray-400 mt-1 w-[90%] truncate-3-lines">
-                  {agent === "zecIntentAgent" ?
-                    "Assistant for helping users to trade by $zec through simple chat" :
-                    "Assistant for helping users to swap tokens by near intents in all chains."}
+                  {agent === "bridgeAgent" ?
+                    "Assistant for helping users to bridge tokens between Zcash & Near Intents." :
+                    agent === "swapAgent" ?
+                      "Assistant for helping users to swap tokens in the Near Intents by ZEC tokens." :
+                      agent === "tradeAgent" ?
+                        "Assistant for helping users to invest and trading on near intents by ZEC tokens. It will invest ZEC tokens in the top-picked momentum crypto tokens from the last 24 hours." :
+                        "Assistant for helping users to trade, bridge & swap tokens, fetch balance and withdraw ZEC tokens to Zcash network."}
                 </p>
               </div>
             ))}
@@ -464,7 +505,7 @@ export default function Dashboard({
                         </a>
                       </>}
                     </div>
-                    {isLoading && index === messages.length - 1 && !isSwaping && !isWithdraw && <div className={`whole-div w-full flex items-center gap-1 justify-start`}>
+                    {isLoading && index === messages.length - 1 && !isSwaping && !isWithdraw && !isInvesting && <div className={`whole-div w-full flex items-center gap-1 justify-start`}>
                       <div className={`relative message px-3 py-2.5 flex items-center gap-1 rounded-lg max-w-xs bg-gray-800`}>
                         <p className={`text-sm text-white`}>Typing...</p>
                       </div>
@@ -485,7 +526,7 @@ export default function Dashboard({
                 className="px-3 py-1 bg-[#f76b15] hidden md:block rounded text-white md:text-xs text-[8px] font-bold"
                 style={{ fontFamily: "orbitron" }}
               >
-                {activeAgent === "zecIntentAgent" ? "ZEC INTENT ASSISTANT" : "SWAP ASSISTANT"}
+                {activeAgent === "bridgeAgent" ? "BRIDGE ASSISTANT" : activeAgent === "swapAgent" ? "SWAP ASSISTANT" : activeAgent === "tradeAgent" ? "TRADE ASSISTANT" : "ZEC INTENT ASSISTANT"}
               </span>
               <input
                 type="text"
@@ -522,7 +563,7 @@ export default function Dashboard({
                 className="px-3 py-1 bg-[#f76b15] rounded text-white text-xs md:text-sm font-bold"
                 style={{ fontFamily: "orbitron" }}
               >
-                {activeAgent === "zecIntentAgent" ? "ZEC INTENT ASSISTANT" : "SWAP ASSISTANT"}
+                {activeAgent === "bridgeAgent" ? "BRIDGE ASSISTANT" : activeAgent === "swapAgent" ? "SWAP ASSISTANT" : activeAgent === "tradeAgent" ? "TRADE ASSISTANT" : "ZEC INTENT ASSISTANT"}
               </span>
 
               {/* Agents Button */}

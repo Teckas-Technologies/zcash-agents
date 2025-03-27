@@ -100,9 +100,13 @@ export default function AgentsModal({
                     </div>
                     <h3 className="font-semibold text-sm truncate-1-lines text-[#21201C]">
                       {/* {agent.name.length > 25 ? agent.name.slice(0, 25) + "..." : agent.name} */}
-                      {agent === "zecIntentAgent" ?
-                        "Zec Intent Assistant" :
-                        "Swap Assistant"}
+                      {agent === "bridgeAgent" ?
+                        "Bridge Assistant" :
+                        agent === "swapAgent" ?
+                          "Swap Assistant" :
+                          agent === "tradeAgent" ?
+                            "Trade Assistant" :
+                            "Zec Intent Assistant"}
                     </h3>
                   </div>
                   <IoMdInformationCircleOutline className="w-5 h-5 text-gray-400" />
@@ -110,9 +114,13 @@ export default function AgentsModal({
 
                 {/* Description */}
                 <p className="text-xs text-gray-400 mt-1">
-                  {agent === "zecIntentAgent" ?
-                    "Assistant for helping users to trade by $zec through simple chat" :
-                    "Assistant for helping users to swap tokens by near intents in all chains."}
+                  {agent === "bridgeAgent" ?
+                    "Assistant for helping users to bridge tokens between Zcash & Near Intents." :
+                    agent === "swapAgent" ?
+                      "Assistant for helping users to swap tokens in the Near Intents by ZEC tokens." :
+                      agent === "tradeAgent" ?
+                        "Assistant for helping users to invest and trading on near intents by ZEC tokens. It will invest ZEC tokens in the top-picked momentum crypto tokens from the last 24 hours." :
+                        "Assistant for helping users to trade, bridge & swap tokens, fetch balance and withdraw ZEC tokens to Zcash network."}
                 </p>
               </div>
             ))}

@@ -26,9 +26,9 @@ export const useChat = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    agentName: data.agentName, // "zecIntentAgent"
+                    agentName: data.agentName, // "bridgeAgent"
                     message: data.inputMessage,
-                    threadId: data.agentName,  // agent id = zecIntentAgent
+                    threadId: data.agentName,  // agent id = bridgeAgent
                     userId: state.address.replace("-", "").split(".")[0],
                 }),
             });

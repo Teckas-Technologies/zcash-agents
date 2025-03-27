@@ -11,6 +11,7 @@ import {
 import {
     INTENTS_CONTRACT_ID,
 } from "./constants";
+import { getNearPublicKeyFromLocalStorage } from "./myUtils";
 
 const provider = new providers.JsonRpcProvider({
     url: "https://rpc.mainnet.near.org",
@@ -69,10 +70,11 @@ export async function generateNonce(accountId: string) {
 export async function storePublicKeyForSigVerification(accountId: string): Promise<void> {
     // const account = await getAccount();
     const account = await connection.account(accountId);
-    const publicKey = await account.connection.signer.getPublicKey(
-        account.accountId,
-        "mainnet"
-    );
+    // const publicKey = await account.connection.signer.getPublicKey(
+    //     account.accountId,
+    //     "mainnet"
+    // );
+    const publicKey = await getNearPublicKeyFromLocalStorage({ connectedAddress: accountId });
 
     const hasPublicKey = await account.viewFunction({
         contractId: INTENTS_CONTRACT_ID,

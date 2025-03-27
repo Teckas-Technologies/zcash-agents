@@ -217,9 +217,13 @@ const Agents = ({
                         className="text-base font-semibold truncate-1-lines text-[#21201C]"
                         style={{ fontFamily: "orbitron" }}
                       >
-                        {agent === "zecIntentAgent" ?
-                          "Zec Intent Assistant" :
-                          "Swap Assistant"}
+                        {agent === "bridgeAgent" ?
+                          "Bridge Assistant" :
+                          agent === "swapAgent" ?
+                            "Swap Assistant" :
+                            agent === "tradeAgent" ?
+                              "Trade Assistant" :
+                              "Zec Intent Assistant"}
                       </h5>
                     </div>
                     <button
@@ -239,9 +243,13 @@ const Agents = ({
                       maxWidth: "calc(100% - 1rem)",
                     }}
                   >
-                    {agent === "zecIntentAgent" ?
-                      "Assistant for helping users to trade by $zec through simple chat" :
-                      "Assistant for helping users to swap tokens by near intents in all chains."}
+                    {agent === "bridgeAgent" ?
+                      "Assistant for helping users to bridge tokens between Zcash & Near Intents." :
+                      agent === "swapAgent" ?
+                        "Assistant for helping users to swap tokens in the Near Intents by ZEC tokens." :
+                        agent === "tradeAgent" ?
+                          "Assistant for helping users to invest and trading on near intents by ZEC tokens. It will invest ZEC tokens in the top-picked momentum crypto tokens from the last 24 hours." :
+                          "Assistant for helping users to trade, bridge & swap tokens, fetch balance and withdraw ZEC tokens to Zcash network."}
                   </p>
 
                   {/* Author and Verification */}

@@ -9,6 +9,7 @@ import { useNearWalletActions } from "@/hooks/useNearWalletActions";
 import { base64 } from "@scure/base";
 import { fetchIntentStatus } from "@/utils/rpcUtils";
 import { useSwap } from "@/hooks/useSwap";
+import { SignAndSendTransactionsParams } from "@/types/interfaces";
 
 
 export default function NearSwapTestPage() {
@@ -179,14 +180,48 @@ export default function NearSwapTestPage() {
         await swapToken({assetInput: "ZEC", amountInput: "0.0006", assetOutput: "wNEAR" });
     }
 
+    const params: SignAndSendTransactionsParams = {
+        transactions: [
+            {
+                signerId: connectWallet.state.address,
+                receiverId: "intents.near",
+                actions: [
+                    {
+                        type: "FunctionCall",
+                        params: {
+                            methodName: "mt_transfer",
+                            args: {
+                                receiver_id: "zec-intents.near",
+                                token_id: "nep141:zec.omft.near",
+                                amount: "100000",
+                                approval: null,
+                                memo: null,
+                                msg: "Deposit ZEC"
+                            },
+                            gas: "300000000000000",
+                            deposit: "1"
+                        }
+                    }
+                ]
+            }
+        ]
+    };
+    
+
+    const handleTransfer = async () => {
+        const res = await nearWalletConnect.signAndSendTransactions(params);
+        console.log("Transfer RES:", res)
+    }
+
     return (
         <div className="p-4 flex flex-col gap-4">
             <h1 className="text-xl font-bold">Test NEAR Swap via Intents</h1>
-            <button onClick={handleSwap} disabled={loading}>
+            {/* <button onClick={handleSwap} disabled={loading}>
                 {loading ? "Processing Swap..." : "Swap Tokens"}
             </button>
-            <button onClick={swap}>Status</button>
-            {result && <pre className="mt-4 whitespace-pre-wrap">{result}</pre>}
+            <button onClick={swap}>Status</button> */}
+            {/* {result && <pre className="mt-4 whitespace-pre-wrap">{result}</pre>} */}
+            <button onClick={handleTransfer}>Transfer to Contract</button>
         </div>
     );
 }

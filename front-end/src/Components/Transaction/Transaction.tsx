@@ -13,7 +13,7 @@ export default function Transaction({
   onMobileNavToggle: () => void;
 }) {
   const [activeTab, setActiveTab] = useState("Bridge");
-  const { loading, error, data } = useTransaction();
+  const { data } = useTransaction() || { data: [], loading: true, error: null };
   const { fetchBridgeHistory, fetchSwapHistory } = useTransactionsHook();
   const [items, setItems] = useState<any[]>([]);
 
@@ -276,7 +276,7 @@ export default function Transaction({
                     </tr>
                   </thead>
                   <tbody className="text-sm">
-                    {data.map((transaction, index) => (
+                    {data.map((transaction: any, index: any) => (
                       <tr key={transaction._id} className="border-b">
                         <td className="py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
                           {index + 1}

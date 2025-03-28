@@ -434,7 +434,7 @@ export default function Dashboard({
                 className="font-semibold text-md"
                 style={{ fontFamily: "orbitron" }}
               >
-                NEAR INTENTS
+                Z-CASH AGENTS
               </h2>
               <div className="div flex justify-end items-center gap-2">
                 <h2
@@ -454,7 +454,7 @@ export default function Dashboard({
             {messages.length === 0 && <div className="text-center">
               <div className="flex justify-center items-center">
                 <img
-                  src="images/near-intent-logo.svg"
+                  src="images/main-logo.png"
                   className="md:h-[50px] h-[40px]"
                 />
               </div>

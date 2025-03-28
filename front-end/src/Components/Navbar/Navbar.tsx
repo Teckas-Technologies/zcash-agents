@@ -274,7 +274,7 @@ export default function Navbar({
                 className="xxl:text-xl text-[#21201C] xl:text-lg font-semibold text-md mt-2"
                 style={{ fontFamily: "orbitron" }}
               >
-                NEAR INTENTS AGENTS
+                Zcash AGENTS
               </h2>
               <p className="text-md text-[#21201C]">Build your own agents!</p>
               <div

@@ -29,7 +29,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Near X Zcash AI Agents",
+  title: "Zcash Agents",
   description: "We are providing specialized ai agents for trade, deposit, swap & withdraw on top of NEAR Intents.",
 };
 

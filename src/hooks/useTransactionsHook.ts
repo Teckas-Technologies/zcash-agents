@@ -60,7 +60,7 @@ export const useTransactionsHook = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/swap_details`, {
+            const response = await fetch(`https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/swap_details/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,63 +1,91 @@
-# Sonic Agents Protocol
+# ZEC Near Intents Agents
 
 ## Introduction
 
-Sonic SVM AI Agents is a decentralized application (dApp) built on **Next.js** and **OpenAI Multi-Agent Systems**. It facilitates seamless blockchain interactions using **Natural Language Processing (NLP)**, enabling users to bridge tokens, swap assets, and track market performance effortlessly.
+**ZEC Near Intents Agents** is a decentralized assistant-powered application built with **LangChain, LangGraph & Next.js** and powered by **LLM-based AI agents**. It helps users manage and grow their **ZEC tokens** across the **Zcash Network** and **NEAR Protocol** through natural language chat.
 
-[![Demo](https://img.shields.io/badge/Demo-Visit%20Demo-brightgreen)](https://sonic-agents-ui.vercel.app/)
-[![Deploy](https://img.shields.io/badge/Deploy-on%20Vercel-blue)](https://vercel.com/new/clone?repository-url=https://github.com/Teckas-Technologies/sonic-agents)
+Users can interact with three specialized assistants in our **chat playground**, each designed to perform specific blockchain operations with ease.
 
-**Key Assistants:**
+[![Demo](https://img.shields.io/badge/Demo-Visit%20Demo-brightgreen)](https://near-intents-agents-ui.vercel.app/)
+[![Deploy](https://img.shields.io/badge/Deploy-on%20Vercel-blue)](https://vercel.com/new/clone?repository-url=https://github.com/Teckas-Technologies/zec-near-intents-agents)
 
-1. **Bridge Assistant** – Enables cross-chain token bridging between **Solana** and **Sonic SVM** using natural language.
-2. **Swap Assistant** – Allows users to swap tokens within the **Sonic SVM chain** through conversational commands.
-3. **CoinMarketCap Assistant** – Provides real-time **market performance insights and token price updates**.
+---
 
-Future assistants will include:
-- **Liquidity Assistant** – Adding liquidity to pools on Sonic SVM.
-- **Minting Assistant** – Minting tokens and NFTs.
+## Key Assistants
 
-## Key Features
+1. **Bridge Assistant**  
+   - Bridge **ZEC tokens** from the **Zcash Network** to the **NEAR Protocol**.  
+   - Fetch your current ZEC balance.  
+   - Withdraw bridged ZEC tokens from **NEAR intents** back to the **Zcash Network**.
 
-- **Cross-Chain Token Bridging** – Securely transfer assets between **Solana and Sonic SVM**.
-- **Seamless Token Swaps** – Swap tokens within **Sonic SVM** effortlessly.
-- **Real-Time Market Data** – Get **live price updates** and **market trends**.
-- **AI-Powered Execution** – Execute blockchain operations using **natural language commands**.  
+2. **Swap Assistant**  
+   - Swap your **ZEC tokens** to other supported tokens within the **NEAR Protocol** using conversational commands.
 
+3. **Trade Assistant**  
+   - Automatically invest ZEC tokens in **top-performing tokens** based on **momentum strategy**.  
+   - The strategy auto-exits trades after **24 hours**, books profits, and transfers funds back to your intents wallet.  
+   - Users can manually **book profits** or **withdraw** at any time using the assistant.
+
+---
+
+## Features
+
+- 🔁 **Cross-chain Bridging** – Zcash ↔️ NEAR bridging powered by intents and conversational interface.  
+- 💱 **One-click Swaps** – Swap ZEC tokens easily within the NEAR ecosystem.  
+- 📈 **Smart Trading Strategy** – Auto-invest and auto-exit on momentum-based tokens.  
+- 💬 **Natural Language Chat** – Use simple language to interact with blockchain systems.  
+- 🧾 **Transaction History Page** – View your **Bridge**, **Swap**, and **Trade** history anytime.
+
+---
 
 ## Setup & Installation
 
-### 1. Clone Repository
+### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/Teckas-Technologies/sonic-agents.git
-cd sonic-agents
+git clone https://github.com/Teckas-Technologies/zec-near-intents-agents.git
+cd zec-near-intents-agents
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 pnpm install
 pnpm run dev
 ```
 
+> ⚠️ Make sure you have your environment variables configured properly.
+
+---
+
 ## Deployment
-Follow these steps to deploy on **Vercel**:
 
-1. **Create an Account** – Sign up on **Vercel**.
-2. **Connect GitHub** – Import the repository.
-3. **Add Environment Variables** – Configure required keys.
-4. **Deploy** – Click the deploy button.
-5. **Access Application** – Open the deployed app.
+To deploy on **Vercel**:
 
-## Future Roadmap
+1. Sign up or log in to [Vercel](https://vercel.com/).
+2. Import this repository from GitHub.
+3. Set the necessary **Environment Variables**.
+4. Click **Deploy**.
+5. Access your live app via the provided Vercel URL.
 
-- **Liquidity Provisioning** – Add liquidity to pools on Sonic SVM.
-- **NFT & Token Minting** – Enable users to mint tokens and NFTs.
-- **Multi-Chain Expansion** – Support additional blockchain networks.
+---
+
+## Roadmap
+
+- 🧠 Custom Strategy Builder (Coming soon)  
+- 📊 Analytics Dashboard for Traders  
+- 🌉 Support for More Chains & Tokens  
+- 🔔 Alerts & Notifications for Market Events  
+
+---
 
 ## Contributors
 
-[![Follow Us on Twitter](https://img.shields.io/badge/Follow-Sonic%20Agents%20Protocol-blue?style=social&logo=twitter)](https://x.com/Sonic_agents)   
+[![Follow Us on Twitter](https://img.shields.io/badge/Follow-Teckas%20Technologies-blue?style=social&logo=twitter)](https://x.com/0xteckas)  
 [![Organization](https://img.shields.io/badge/Powered%20By-Teckas%20Technologies-green)](https://www.teckastechnologies.com/)
 
+---
+
 ## License
-MIT License © 2025 Sonic Agents Protocol
+
+MIT License © 2025 ZEC Near Intents Agents

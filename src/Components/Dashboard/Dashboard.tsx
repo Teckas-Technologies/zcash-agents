@@ -369,7 +369,7 @@ export default function Dashboard({
                   <div className="flex items-center space-x-1">
                     <div className="logo h-6 w-6 p-1 rounded-[4px] bg-[#21201C]">
                       <img
-                        src="/icons/network/near.svg"
+                        src="images/logo-green.png"
                         alt={agent}
                         className="h-4 w-4 object-contain"
                       />

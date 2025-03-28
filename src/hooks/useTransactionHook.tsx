@@ -12,7 +12,7 @@ const API_URL =
   "https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/capital?receiver_id=mosaic-vint.near";
 
 const useTransaction = () => {
-  const [data, setData] = useState<Transaction[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

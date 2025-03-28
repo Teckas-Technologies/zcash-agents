@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import useTransaction from "@/hooks/useTransactionHook";
+import { useTransactionsHook } from "@/hooks/useTransactionsHook";
 
 export default function Transaction({
   onToggle,
@@ -12,12 +13,30 @@ export default function Transaction({
   onMobileNavToggle: () => void;
 }) {
   const [activeTab, setActiveTab] = useState("Bridge");
-  const { data, loading, error } = useTransaction();
+  const { loading, error, data } = useTransaction();
+  const { fetchBridgeHistory, fetchSwapHistory } = useTransactionsHook();
+  const [items, setItems] = useState<any[]>([]);
 
-  const handleTabClick = (tab) => {
+  const handleTabClick = (tab: string) => {
     setActiveTab(tab);
     // Navigate to the corresponding section if needed
   };
+
+  const fetchData = async () => {
+    if (activeTab === "Bridge") {
+      const res = await fetchBridgeHistory();
+      console.log("RES:", res)
+      setItems(res.data || []);
+    } else if (activeTab === "Swap") {
+      const res = await fetchSwapHistory();
+      console.log("RES:", res)
+      setItems(res || []);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, [activeTab])
 
   return (
     <div className="flex flex-col items-center h-screen w-full bg-gray-100">
@@ -53,11 +72,10 @@ export default function Transaction({
             <button
               key={tab}
               onClick={() => handleTabClick(tab)}
-              className={`px-3 py-1 rounded-md transition ${
-                activeTab === tab
-                  ? "bg-[#4dd092] text-white"
-                  : "text-gray-600 hover:bg-gray-200"
-              }`}
+              className={`px-3 py-1 rounded-md transition ${activeTab === tab
+                ? "bg-[#4dd092] text-white"
+                : "text-gray-600 hover:bg-gray-200"
+                }`}
             >
               {tab}
             </button>
@@ -96,52 +114,37 @@ export default function Transaction({
                         Transaction Staus
                       </th>
                       <th className="hidden md:block py-2 md:px-4 px-1 whitespace-nowrap">
-                        Transaction Details
-                      </th>
-                      <th className="py-2 md:px-4 px-1 whitespace-nowrap md:hidden block">
-                        Details
+                        Explorer
                       </th>
                     </tr>
                   </thead>
 
                   <tbody className="text-sm">
-                    {data.map((transaction, index) => (
+                    {items && items.length !== 0 && items.map((transaction, index) => (
                       <tr key={transaction._id} className="border-b">
                         <td className="py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
                           {index + 1}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.receiver_id}
+                          {(transaction?.amount / 10 ** 8).toFixed(8).replace(/\.?0+$/, "")}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.tokens_to_buy[0]?.symbol} (
-                          {transaction.tokens_to_buy[0]?.share}%)
+                          {"Zcash"}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.tokens_to_buy[1]?.symbol} (
-                          {transaction.tokens_to_buy[1]?.share}%)
+                          {"NEAR"}
                         </td>
                         <td className="py-3 md:px-4 px-1 font-semibold whitespace-nowrap">
-                          {transaction.total_zec}
+                          {transaction.status}
                         </td>
                         <td className="hidden md:block py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
                           <a
-                            href={`https://mainnet.zcashexplorer.app/transactions/${transaction.deposit_hash}`}
+                            href={`https://mainnet.zcashexplorer.app/transactions/${transaction.tx_hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
                           >
                             View Transaction
-                          </a>
-                        </td>
-                        <td className="md:hidden block py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
-                          <a
-                            href={`https://mainnet.zcashexplorer.app/transactions/${transaction.deposit_hash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            View
                           </a>
                         </td>
                       </tr>
@@ -170,9 +173,7 @@ export default function Transaction({
                       <th className="py-2 md:px-4 px-1 whitespace-nowrap">
                         S.NO
                       </th>
-                      <th className="py-2 md:px-4 px-1 whitespace-nowrap">
-                        Amount Swapped
-                      </th>
+
                       <th className="py-2 md:px-4 px-1 whitespace-nowrap">
                         Source Token
                       </th>
@@ -180,62 +181,49 @@ export default function Transaction({
                         Destination Token
                       </th>
                       <th className="py-2 md:px-4 px-1 whitespace-nowrap">
+                        From Amount
+                      </th>
+                      <th className="py-2 md:px-4 px-1 whitespace-nowrap">
+                        To Amount
+                      </th>
+                      <th className="py-2 md:px-4 px-1 whitespace-nowrap">
                         Transaction Staus
                       </th>
-
-                      <th className="py-2 md:px-4 px-1 whitespace-nowrap">
-                        Slippage
-                      </th>
-                      <th className="hidden md:block py-2 md:px-4 px-1 whitespace-nowrap">
-                        Transaction Details
-                      </th>
                       <th className="py-2 md:px-4 px-1 whitespace-nowrap md:hidden block">
-                        Details
+                        Explorer
                       </th>
                     </tr>
                   </thead>
                   <tbody className="text-sm">
-                    {data.map((transaction, index) => (
+                    {items && items.length !== 0 && items?.map((transaction, index) => (
                       <tr key={transaction._id} className="border-b">
                         <td className="py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
                           {index + 1}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.receiver_id}
+                          {transaction.from_token}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.tokens_to_buy[0]?.symbol} (
-                          {transaction.tokens_to_buy[0]?.share}%)
+                          {transaction.to_token}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.tokens_to_buy[1]?.symbol} (
-                          {transaction.tokens_to_buy[1]?.share}%)
+                          {transaction?.from_amount}
                         </td>
                         <td className="py-3 md:px-4 px-1 font-semibold whitespace-nowrap">
-                          {transaction.total_zec}
+                          {transaction?.to_amount}
                         </td>
                         <td className="py-3 md:px-4 px-1 font-semibold whitespace-nowrap">
-                          {transaction.total_zec}
+                          {"Completed"}
                         </td>
 
                         <td className="hidden md:block py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
                           <a
-                            href={`https://mainnet.zcashexplorer.app/transactions/${transaction.deposit_hash}`}
+                            href={`https://nearblocks.io/txns/${transaction.deposit_hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
                           >
                             View Transaction
-                          </a>
-                        </td>
-                        <td className="md:hidden block py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
-                          <a
-                            href={`https://mainnet.zcashexplorer.app/transactions/${transaction.deposit_hash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            View
                           </a>
                         </td>
                       </tr>
@@ -294,18 +282,21 @@ export default function Transaction({
                           {index + 1}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.receiver_id}
+                          {(transaction?.total_zec / 10 ** 8).toFixed(8).replace(/\.?0+$/, "")}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.tokens_to_buy[0]?.symbol} (
-                          {transaction.tokens_to_buy[0]?.share}%)
+                          {transaction.tokens_to_buy[0]?.symbol} , 
+                          {transaction.tokens_to_buy[1]?.symbol}
+                          {/* (
+                          {transaction.tokens_to_buy[0]?.share}%) */}
                         </td>
                         <td className="py-3 md:px-4 px-1 whitespace-nowrap">
-                          {transaction.tokens_to_buy[1]?.symbol} (
-                          {transaction.tokens_to_buy[1]?.share}%)
+                          {/* {transaction.tokens_to_buy[1]?.symbol} (
+                          {transaction.tokens_to_buy[1]?.share}%) */}
+                          {(transaction?.final_zec / 10 ** 8).toFixed(8).replace(/\.?0+$/, "")}
                         </td>
                         <td className="py-3 md:px-4 px-1 font-semibold whitespace-nowrap">
-                          {transaction.total_zec}
+                          {transaction.status}
                           {/* <span
                         className={`px-2 py-1 text-xs font-semibold rounded-lg ${
                           transaction.status === "Completed"
@@ -319,26 +310,16 @@ export default function Transaction({
                       </span> */}
                         </td>
                         <td className="py-3 md:px-4 px-1 font-semibold whitespace-nowrap">
-                          {transaction.total_zec}
+                          {"Momentum 24h"}
                         </td>
                         <td className="hidden md:block py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
                           <a
-                            href={`https://mainnet.zcashexplorer.app/transactions/${transaction.deposit_hash}`}
+                            href={`https://nearblocks.io/txns/${transaction.deposit_hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
                           >
                             View Transaction
-                          </a>
-                        </td>
-                        <td className="md:hidden block py-3 md:px-4 px-1 text-gray-700 whitespace-nowrap">
-                          <a
-                            href={`https://mainnet.zcashexplorer.app/transactions/${transaction.deposit_hash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            View
                           </a>
                         </td>
                       </tr>

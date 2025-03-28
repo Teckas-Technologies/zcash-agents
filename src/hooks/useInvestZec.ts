@@ -82,7 +82,7 @@ export const useInvestZec = () => {
                 // const uuid = uuidv4();
                 // console.log(uuid);
 
-                const res = await createCapital({ depositHash: outcome as string, tokensToBuy: tokens, amount: parsedAmount.toString() });
+                const res = await createCapital({ depositHash: outcome as string, tokensToBuy: tokens, amount: amount });
                 console.log("Res: ", res)
 
                 return { success: true, message: `Invest ZEC executed successfully!`, txHash: outcome };

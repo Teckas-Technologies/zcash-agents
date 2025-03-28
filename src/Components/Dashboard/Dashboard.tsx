@@ -197,23 +197,21 @@ export default function Dashboard({
               }
 
               setIsInvesting(true);
-              setMessages((prev) => [...prev, { role: "ai", message: `Trading logics are in progress` }]);
-              return;
-              // setMessages((prev) => [...prev, { role: "ai", message: `Investing ${amount} ZEC is in progress...` }]);
-              // const investRes = await investZec({ amount: amount, tokens: tokensToBuy });
-              // console.log("Invest RES:", investRes)
-              // if (investRes?.success) {
-              //   console.log(`${investRes.message}, txHash: ${investRes.txHash}`)
-              //   updateLastAiMessage("Your recent investment was successful!", investRes?.txHash as string);
-              //   return;
-              // } else if (!investRes?.success) {
-              //   console.log(`${investRes?.message}`)
-              //   updateLastAiMessage(`${investRes?.message === "Window closed" ? "You rejected the investment!" : investRes?.message}`);
-              //   return;
-              // } else {
-              //   updateLastAiMessage("Your recent investment has failed!")
-              //   return;
-              // }
+              setMessages((prev) => [...prev, { role: "ai", message: `Investing ${amount} ZEC is in progress...` }]);
+              const investRes = await investZec({ amount: amount, tokens: tokensToBuy });
+              console.log("Invest RES:", investRes)
+              if (investRes?.success) {
+                console.log(`${investRes.message}, txHash: ${investRes.txHash}`)
+                updateLastAiMessage("Your recent investment was successful!", investRes?.txHash as string);
+                return;
+              } else if (!investRes?.success) {
+                console.log(`${investRes?.message}`)
+                updateLastAiMessage(`${investRes?.message === "Window closed" ? "You rejected the investment!" : investRes?.message}`);
+                return;
+              } else {
+                updateLastAiMessage("Your recent investment has failed!")
+                return;
+              }
             }
             // else if (toolMessage?.type === "balance") {
             //   const balance = await getBalance(state.address, "zec.omft.near");

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useConnectWallet } from './useConnectWallet';
+import { PYTHON_SERVER_URL } from '@/constants';
 
 interface RequestFields {
     inputMessage: string;
@@ -20,7 +21,7 @@ export const useChat = () => {
         setError(null);
 
         try {
-            const response = await fetch('https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/chat', {
+            const response = await fetch(`${PYTHON_SERVER_URL}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ export const useChat = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/list-agents`, {
+            const response = await fetch(`${PYTHON_SERVER_URL}/api/list-agents`, {
                 method: "GET",
                 // headers: {
                 //     "Content-Type": "application/json",
@@ -83,7 +84,7 @@ export const useChat = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/history/${state.address.replace("-", "").split(".")[0]}/${agentName}`, {
+            const response = await fetch(`${PYTHON_SERVER_URL}/api/history/${state.address.replace("-", "").split(".")[0]}/${agentName}`, {
                 method: "GET"
             })
             if (!response.ok) {
@@ -108,7 +109,7 @@ export const useChat = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/history/${state.address.replace("-", "").split(".")[0]}/${agentName}`, {
+            const response = await fetch(`${PYTHON_SERVER_URL}/api/history/${state.address.replace("-", "").split(".")[0]}/${agentName}`, {
                 method: "DELETE"
             })
             if (!response.ok) {

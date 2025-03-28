@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useConnectWallet } from './useConnectWallet';
 import { Asset } from './useInvestZec';
+import { PYTHON_SERVER_URL } from '@/constants';
 
 interface RequestFields {
-    capitalId: string;
+    depositHash: string;
     tokensToBuy: Asset[];
     amount: string;
 }
@@ -21,13 +22,13 @@ export const useCapitalHook = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetch('https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net/api/create-capital', {
+            const response = await fetch(`${PYTHON_SERVER_URL}/api/create-capital`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    capital_id: data.capitalId,
+                    deposit_hash: data.depositHash,
                     tokens_to_buy: data.tokensToBuy,
                     receiver_id: state.address,
                     total_zec: data.amount

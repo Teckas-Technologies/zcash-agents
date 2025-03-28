@@ -5,6 +5,7 @@ import { useNearWalletActions } from "./useNearWalletActions";
 import { SignAndSendTransactionsParams } from "@/types/interfaces";
 import { v4 as uuidv4 } from 'uuid';
 import { useCapitalHook } from "./useCapitalHook";
+import { INTENTS_CONTRACT_ID } from "@/utils/constants";
 
 export type Asset = {
     defuse_asset_id: string;
@@ -45,12 +46,12 @@ export const useInvestZec = () => {
             transactions: [
                 {
                     signerId: state.address,
-                    receiverId: "intents.near",
+                    receiverId: INTENTS_CONTRACT_ID,
                     actions: [
                         {
                             type: "FunctionCall",
                             params: {
-                                methodName: "mt_transfer_call",
+                                methodName: "mt_transfer",
                                 args: {
                                     receiver_id: "zec-intents.near",
                                     token_id: "nep141:zec.omft.near",
@@ -81,8 +82,8 @@ export const useInvestZec = () => {
                 // const uuid = uuidv4();
                 // console.log(uuid);
 
-                // const res = await createCapital({ capitalId: uuid, tokensToBuy: tokens, amount: parsedAmount.toString()});
-                // console.log("Res: ", res)
+                const res = await createCapital({ depositHash: outcome as string, tokensToBuy: tokens, amount: parsedAmount.toString() });
+                console.log("Res: ", res)
 
                 return { success: true, message: `Invest ZEC executed successfully!`, txHash: outcome };
             } else {

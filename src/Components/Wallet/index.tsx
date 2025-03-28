@@ -65,7 +65,7 @@ const ConnectWallet = () => {
                             Popular options
                         </Text>
 
-                        {isSupportedByBrowser() && (
+                        {/* {isSupportedByBrowser() && (
                             <Button
                                 onClick={() => handlePasskey()}
                                 size="4"
@@ -86,12 +86,12 @@ const ConnectWallet = () => {
                                     </Text>
                                 </div>
                             </Button>
-                        )}
+                        )} */}
 
                         {whitelabelTemplate === "turboswap" ? (
                             <>
                                 {/* WalletConnect */}
-                                {connectors
+                                {/* {connectors
                                     .filter((c) => c.id === "walletConnect")
                                     .map((connector) => (
                                         <Button
@@ -110,7 +110,7 @@ const ConnectWallet = () => {
                                                 </Text>
                                             </div>
                                         </Button>
-                                    ))}
+                                    ))} */}
 
                                 {/* EIP-6963 detected wallets */}
                                 {connectors
@@ -159,7 +159,7 @@ const ConnectWallet = () => {
                                     </div>
                                 </Button>
 
-                                <Button
+                                {/* <Button
                                     onClick={handleSolanaWalletSelector}
                                     size="4"
                                     radius="medium"
@@ -178,7 +178,7 @@ const ConnectWallet = () => {
                                             Solana Wallet
                                         </Text>
                                     </div>
-                                </Button>
+                                </Button> */}
 
                                 {/* Other non-EIP-6963 connectors */}
                                 {connectors
@@ -207,7 +207,7 @@ const ConnectWallet = () => {
                         ) : (
                             // Original order for other templates
                             <>
-                                <Button
+                                {/* <Button
                                     onClick={handleSolanaWalletSelector}
                                     size="4"
                                     radius="medium"
@@ -226,7 +226,7 @@ const ConnectWallet = () => {
                                             Solana Wallet
                                         </Text>
                                     </div>
-                                </Button>
+                                </Button> */}
 
                                 {whitelabelTemplate !== "solswap" && (
                                     <>
@@ -250,7 +250,7 @@ const ConnectWallet = () => {
                                                 </Text>
                                             </div>
                                         </Button>
-                                        {connectors.slice(0, 1).map((connector) => (
+                                        {/* {connectors.slice(0, 1).map((connector) => (
                                             <Button
                                                 key={connector.uid}
                                                 onClick={() => handleWalletConnect(connector)}
@@ -267,8 +267,8 @@ const ConnectWallet = () => {
                                                     </Text>
                                                 </div>
                                             </Button>
-                                        ))}
-                                        <Text size="1" color="gray">
+                                        ))} */}
+                                        {/* <Text size="1" color="gray">
                                             Other options
                                         </Text>
                                         {connectors
@@ -291,7 +291,7 @@ const ConnectWallet = () => {
                                                         </Text>
                                                     </div>
                                                 </Button>
-                                            ))}
+                                            ))} */}
                                     </>
                                 )}
                             </>

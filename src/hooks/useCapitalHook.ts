@@ -57,14 +57,11 @@ export const useCapitalHook = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`${PYTHON_SERVER_URL}/api/close-position`, {
+            const response = await fetch(`${PYTHON_SERVER_URL}/api/capital/close-position/${capitalId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    capital_id: capitalId
-                }),
+                }
             });
 
             if (!response.ok) {

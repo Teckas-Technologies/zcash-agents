@@ -131,7 +131,7 @@ export const useSwap = () => {
             // Handle settlement results
             if (settlementResult.status === "SETTLED") {
                 console.log("Transaction settled:", settlementResult.txHash);
-                return { success: true, message: `Swap executed successfully!`, txHash: settlementResult.txHash };
+                return { success: true, message: `Swap executed successfully!`, txHash: settlementResult.txHash, quote: quote, inputDecimal: inputAsset.decimals, outputDecimals: outputAsset.decimals };
             }
 
             if (settlementResult.status === "NOT_FOUND_OR_NOT_VALID") {

@@ -16,6 +16,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { getBalance } from "@/utils/intentUtils";
 import { useWithdraw } from "@/hooks/useWithdraw";
 import { useInvestZec } from "@/hooks/useInvestZec";
+import { useTransactionsHook } from "@/hooks/useTransactionsHook";
 
 const MarkdownToJSX = dynamic(() => import("markdown-to-jsx"), { ssr: false });
 
@@ -78,6 +79,7 @@ export default function Dashboard({
   const { swapToken } = useSwap();
   const { withdrawToken } = useWithdraw();
   const { investZec } = useInvestZec();
+  const { addSwapHistory } = useTransactionsHook();
   const { chat, fetchChatHistory, clearHistory, fetchAgents } = useChat();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -156,6 +158,19 @@ export default function Dashboard({
 
       return updatedMessages;
     });
+  };
+
+  const parseAmountWithDecimals = (amount: string, decimals: number) => {
+    if (!amount || !decimals) return "0";
+
+    const paddedAmount = amount.padStart(decimals + 1, '0'); // Ensure enough padding
+    const integerPart = paddedAmount.slice(0, -decimals) || "0"; // Part before decimal
+    const fractionalPart = paddedAmount.slice(-decimals); // Part after decimal
+
+    // Remove trailing zeros in fractional part
+    const cleanFraction = fractionalPart.replace(/0+$/, '');
+
+    return cleanFraction ? `${integerPart}.${cleanFraction}` : integerPart;
   };
 
   // Chat functions & actions
@@ -238,9 +253,19 @@ export default function Dashboard({
               setMessages((prev) => [...prev, { role: "ai", message: `Swapping is in progress...` }]);
               const swapRes = await swapToken({ assetInput: inputTokenSymbol, amountInput: amount.toString(), assetOutput: outputTokenSymbol });
               console.log("Swap RES:", swapRes)
+              const { quote, inputDecimal, outputDecimals } = swapRes;
+              const { amount_in, amount_out } = quote;
+
+              const parsedAmountIn = parseAmountWithDecimals(amount_in, inputDecimal);
+              const parsedAmountOut = parseAmountWithDecimals(amount_out, outputDecimals);
+
+              console.log("Swap Results:");
+              console.log("Amount In:", parsedAmountIn);
+              console.log("Amount Out:", parsedAmountOut);
               if (swapRes?.success) {
                 console.log(`${swapRes.message}, txHash: ${swapRes.txHash}`)
                 updateLastAiMessage("Your recent swap was successful!", swapRes.txHash);
+                await addSwapHistory({ fromToken: inputTokenSymbol, toToken: outputTokenSymbol, fromAmount: parsedAmountIn, toAmount: parsedAmountOut, txHash: swapRes?.txHash as string})
                 return;
               } else if (!swapRes.success) {
                 console.log(`${swapRes.message}`)

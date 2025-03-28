@@ -10,6 +10,7 @@ import { base64 } from "@scure/base";
 import { fetchIntentStatus } from "@/utils/rpcUtils";
 import { useSwap } from "@/hooks/useSwap";
 import { SignAndSendTransactionsParams } from "@/types/interfaces";
+import { useTransactionsHook } from "@/hooks/useTransactionsHook";
 
 
 export default function NearSwapTestPage() {
@@ -180,6 +181,8 @@ export default function NearSwapTestPage() {
         await swapToken({assetInput: "ZEC", amountInput: "0.0006", assetOutput: "wNEAR" });
     }
 
+    const {fetchBridgeHistory, fetchSwapHistory} = useTransactionsHook();
+
     const params: SignAndSendTransactionsParams = {
         transactions: [
             {
@@ -209,7 +212,8 @@ export default function NearSwapTestPage() {
     
 
     const handleTransfer = async () => {
-        const res = await nearWalletConnect.signAndSendTransactions(params);
+        const res = await fetchSwapHistory();
+        // const res = await nearWalletConnect.signAndSendTransactions(params);
         console.log("Transfer RES:", res)
     }
 

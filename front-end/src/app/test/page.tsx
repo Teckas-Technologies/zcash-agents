@@ -212,9 +212,9 @@ export default function NearSwapTestPage() {
     
 
     const handleTransfer = async () => {
-        const res = await fetchSwapHistory();
+        // const res = await fetchSwapHistory();
         // const res = await nearWalletConnect.signAndSendTransactions(params);
-        console.log("Transfer RES:", res)
+        // console.log("Transfer RES:", res)
     }
 
     return (

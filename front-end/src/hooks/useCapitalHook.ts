@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useConnectWallet } from './useConnectWallet';
 import { Asset } from './useInvestZec';
-const PYTHON_SERVER_URL = "https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net"
+import { PYTHON_SERVER_URL } from '@/constants';
 
 interface RequestFields {
     depositHash: string;

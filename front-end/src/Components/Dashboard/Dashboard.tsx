@@ -89,6 +89,7 @@ export default function Dashboard({
   const [isWithdraw, setIsWithdraw] = useState(false);
   const [isSwaping, setIsSwaping] = useState(false);
   const [isInvesting, setIsInvesting] = useState(false);
+  const [agentsLoading, setAgentsLoading] = useState(false);
 
   useEffect(() => {
     // Scroll to bottom when messages update
@@ -136,8 +137,10 @@ export default function Dashboard({
   }
 
   const fetchSonicAgents = async () => {
+    setAgentsLoading(true);
     const res = await fetchAgents();
     setAgents(res.agents);
+    setAgentsLoading(false)
   }
 
   const clearChatHistory = async () => {
@@ -221,7 +224,8 @@ export default function Dashboard({
                 return;
               } else if (!investRes?.success) {
                 console.log(`${investRes?.message}`)
-                updateLastAiMessage(`${investRes?.message === "Window closed" ? "You rejected the investment!" : investRes?.message}`);
+                updateLastAiMessage(`${investRes?.message === "Window closed" || investRes?.message?.includes("rejected") ? "You rejected the investment!" :
+                  investRes?.message?.includes("operation") || investRes?.message?.includes("costin") ? "You don’t have enough NEAR balance in your wallet to cover the gas fee. Please top up your wallet and try again." : investRes?.message}`);
                 return;
               } else {
                 updateLastAiMessage("Your recent investment has failed!")
@@ -254,22 +258,24 @@ export default function Dashboard({
               const swapRes = await swapToken({ assetInput: inputTokenSymbol, amountInput: amount.toString(), assetOutput: outputTokenSymbol });
               console.log("Swap RES:", swapRes)
               const { quote, inputDecimal, outputDecimals } = swapRes;
-              const { amount_in, amount_out } = quote;
 
-              const parsedAmountIn = parseAmountWithDecimals(amount_in, inputDecimal);
-              const parsedAmountOut = parseAmountWithDecimals(amount_out, outputDecimals);
-
-              console.log("Swap Results:");
-              console.log("Amount In:", parsedAmountIn);
-              console.log("Amount Out:", parsedAmountOut);
               if (swapRes?.success) {
+                const { amount_in, amount_out } = quote;
+
+                const parsedAmountIn = parseAmountWithDecimals(amount_in, inputDecimal);
+                const parsedAmountOut = parseAmountWithDecimals(amount_out, outputDecimals);
+                console.log("Swap Results:");
+                console.log("Amount In:", parsedAmountIn);
+                console.log("Amount Out:", parsedAmountOut);
+
                 console.log(`${swapRes.message}, txHash: ${swapRes.txHash}`)
                 updateLastAiMessage("Your recent swap was successful!", swapRes.txHash);
-                await addSwapHistory({ fromToken: inputTokenSymbol, toToken: outputTokenSymbol, fromAmount: parsedAmountIn, toAmount: parsedAmountOut, txHash: swapRes?.txHash as string})
+                await addSwapHistory({ fromToken: inputTokenSymbol, toToken: outputTokenSymbol, fromAmount: parsedAmountIn, toAmount: parsedAmountOut, txHash: swapRes?.txHash as string })
                 return;
               } else if (!swapRes.success) {
                 console.log(`${swapRes.message}`)
-                updateLastAiMessage(`${swapRes.message === "Window closed" ? "You rejected the swap!" : swapRes.message}`);
+                updateLastAiMessage(`${(swapRes.message === "Window closed" || swapRes?.message === "User rejected") ? "You rejected the swap!" :
+                  swapRes?.message?.includes("operation") || swapRes?.message?.includes("costin") ? "You don’t have enough NEAR balance in your wallet to cover the gas fee. Please top up your wallet and try again." : swapRes.message}`);
                 return;
               } else {
                 updateLastAiMessage("Your recent swap has failed!")
@@ -293,7 +299,8 @@ export default function Dashboard({
                 return;
               } else if (!withdrawRes?.success) {
                 console.log(`${withdrawRes?.message}`)
-                updateLastAiMessage(`${withdrawRes.message === "Window closed" ? "You rejected the withdrawal!" : withdrawRes.message}`);
+                updateLastAiMessage(`${withdrawRes.message === "Window closed" || withdrawRes?.message?.includes("rejected") ? "You rejected the withdrawal!" :
+                  withdrawRes?.message?.includes("operation") || withdrawRes?.message?.includes("costin") ? "You don’t have enough NEAR balance in your wallet to cover the gas fee. Please top up your wallet and try again." : withdrawRes.message}`);
                 return;
               } else {
                 updateLastAiMessage("Your recent withdraw was failed!")
@@ -422,6 +429,7 @@ export default function Dashboard({
                 </p>
               </div>
             ))}
+            {agentsLoading && <h2 className="text-center text-sm mt-3">Fetching agents...</h2>}
           </div>
         </div>
 

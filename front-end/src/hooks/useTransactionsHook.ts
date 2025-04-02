@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useConnectWallet } from './useConnectWallet';
-const PYTHON_SERVER_URL = "https://zec-intents-ai-cmanegh4dkcgfage.canadacentral-01.azurewebsites.net"
+import { PYTHON_SERVER_URL } from '@/constants';
 
 interface RequestFields {
     fromToken: string;
@@ -89,14 +89,39 @@ export const useTransactionsHook = () => {
         }
     };
 
-    const fetchSwapHistory = async () => {
+    const fetchSwapHistory = async ({ page }: { page: number | null }) => {
         if (!state.address) {
             return;
         }
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`${PYTHON_SERVER_URL}/api/swap_details/${state.address}`, {
+            const response = await fetch(`${PYTHON_SERVER_URL}/api/swap_details/${state.address}/${page !== null ? page : 1}`, {
+                method: "GET"
+            })
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+            const result = await response.json();
+            console.log("Result:", result)
+            return result;
+        } catch (err: any) {
+            console.error("Error occurred:", err);
+            setError(err?.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+            console.log("Loading state set to false");
+        }
+    }
+
+    const fetchTradeHistory = async ({ page }: { page: number | null }) => {
+        if (!state.address) {
+            return;
+        }
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await fetch(`${PYTHON_SERVER_URL}/api/capital?receiver_id=${state.address}&page=${page !== null ? page : 1}`, {
                 method: "GET"
             })
             if (!response.ok) {
@@ -115,5 +140,5 @@ export const useTransactionsHook = () => {
     }
 
 
-    return { loading, error, fetchBridgeHistory, addSwapHistory, fetchSwapHistory };
+    return { loading, error, fetchBridgeHistory, addSwapHistory, fetchSwapHistory, fetchTradeHistory };
 };

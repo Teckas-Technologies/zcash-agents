@@ -218,7 +218,7 @@ export default function Navbar({
 
           {/* Connect Wallet Button */}
           <div className="mt-auto">
-            <button
+            <div
               className="w-full py-2 rounded-lg cursor-pointer flex justify-center items-center gap-2 text-sm bg-white text-black font-bold transition"
               style={{ fontFamily: "manrope" }}
             >
@@ -234,7 +234,7 @@ export default function Navbar({
               {/* {(!isCollapsed || isMobileNavVisible) && (
                 !isConnected ? <span>Connect Wallet</span> : <span>Disconnect</span>
               )} */}
-            </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -270,13 +270,13 @@ export default function Navbar({
                   className="md:h-[40px] h-[30px]"
                 />
               </div>
-              <h2
+              {/* <h2
                 className="xxl:text-xl text-[#21201C] xl:text-lg font-semibold text-md mt-2"
                 style={{ fontFamily: "orbitron" }}
               >
                 Zcash AGENTS
-              </h2>
-              <p className="text-md text-[#21201C]">Build your own agents!</p>
+              </h2> */}
+              <p className="text-lg font-medium text-[#21201C] mt-1">Build your own agents!</p>
               <div
                 className="soon max-w-[10rem] mt-2 text-center px-3 py-1 bg-[#F76B15] rounded text-white md:text-sm text-[8px] font-semibold"
                 style={{ fontFamily: "orbitron" }}

@@ -205,11 +205,11 @@ const Agents = ({
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       {agent && (
-                        <div className="logo w-8 h-8 p-1 bg-[#21201C] rounded-md">
+                        <div className="logo w-7 h-7 p-1 bg-[#21201C] rounded-md">
                           <img
-                            src="/icons/network/near.svg"
+                            src="images/logo-green.png"
                             alt={`${agent} logo`}
-                            className="h-6 w-6"
+                            className="h-5 w-5"
                           />
                         </div>
                       )}
@@ -263,7 +263,7 @@ const Agents = ({
                       <img
                         src="/images/teckas.png"
                         alt="Author Logo"
-                        className="w-5 h-5 rounded-full"
+                        className="w-4 h-4 rounded-full"
                       />
                       <span className="text-gray-500 text-sm">
                         {"Teckas"} {/** agent.author */}

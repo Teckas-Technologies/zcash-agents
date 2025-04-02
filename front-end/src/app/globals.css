@@ -66,6 +66,7 @@ body {
 /* For WebKit Browsers (e.g., Chrome, Safari) */
 .scroll-d::-webkit-scrollbar {
   width: 6px; 
+  height: 6px;
 }
 
 .scroll-d::-webkit-scrollbar-track {

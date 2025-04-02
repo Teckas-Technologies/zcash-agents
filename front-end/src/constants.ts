@@ -1,1 +1,1 @@
-export const PYTHON_SERVER_URL = "http://localhost:8000" // process.env.NEXT_PUBLIC_PYTHON_SERVER_URL
+export const PYTHON_SERVER_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL
